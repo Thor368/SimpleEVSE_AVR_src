@@ -102,10 +102,9 @@ int main(void)
 	}
 	
 	uint8_t charge_speed = eeprom_read_byte(&charge_speed_EE);
-	show_speed(charge_speed);
 	
-    while (hall_read())
-    {
+	while (hall_read())
+	{
 		if (charge_speed == 6)
 			charge_speed = 12;
 		else if (charge_speed == 12)
@@ -114,10 +113,10 @@ int main(void)
 			charge_speed = 6;
 		else
 			charge_speed = 6;
-		
+
 		show_speed(charge_speed);
-    }
-	
+	}
+		
 	eeprom_update_byte(&charge_speed_EE, charge_speed);
 	
 	uint16_t fb = ADC_read();
