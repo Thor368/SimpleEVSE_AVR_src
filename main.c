@@ -103,6 +103,8 @@ int main(void)
 	
 	uint8_t charge_speed = eeprom_read_byte(&charge_speed_EE);
 	
+	_delay_ms(50);
+	
 	while (hall_read())
 	{
 		if (charge_speed == 6)
