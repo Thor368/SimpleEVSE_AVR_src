@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/eeprom.h>
+#include <stdbool.h>
 
 #define LED_ON			PORTB |= 1 << PB3
 #define LED_OFF			PORTB &= ~(1 << PB3)
@@ -82,6 +83,24 @@ uint8_t hall_read()
 		return 0;
 }
 
+bool scnan_hall(void)
+{
+	for (uint8_t i = 0, cc = 0; i < 100; i++)
+	{
+		if (hall_read())
+			cc++;
+		else
+			cc = 0;
+		
+		if (cc >= 10)
+			return(true);
+
+		_delay_ms(1);
+	}
+	
+	return(false);
+}
+
 int main(void)
 {
 	PORTB = 0b100;
@@ -103,9 +122,7 @@ int main(void)
 	
 	uint8_t charge_speed = eeprom_read_byte(&charge_speed_EE);
 	
-	_delay_ms(50);
-	
-	while (hall_read())
+	while (scnan_hall())
 	{
 		if (charge_speed == 6)
 			charge_speed = 12;
@@ -128,5 +145,6 @@ int main(void)
 	SET_SPEED(charge_speed);
 	RELAIS_ON;
 	
+	show_speed(charge_speed);
 	while(1);
 }
