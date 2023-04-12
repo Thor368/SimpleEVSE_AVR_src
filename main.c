@@ -12,6 +12,10 @@
 #include <avr/eeprom.h>
 #include <stdbool.h>
 
+#define SPEED_SLOW		10
+#define SPEED_FAST		16
+#define SPEED_FULL		32
+
 #define LED_ON			PORTB |= 1 << PB3
 #define LED_OFF			PORTB &= ~(1 << PB3)
 #define RELAIS_ON		PORTB |= 1 << PB0
@@ -53,9 +57,9 @@ void blink_LED_full()
 
 void show_speed(uint8_t speed)
 {
-	if (speed <= 6)
+	if (speed <= SPEED_SLOW)
 		blink_LED_slow();
-	else if (speed <= 12)
+	else if (speed <= SPEED_FAST)
 		blink_LED_fast();
 	else
 		blink_LED_full();
@@ -83,7 +87,7 @@ uint8_t hall_read()
 		return 0;
 }
 
-bool scnan_hall(void)
+bool scan_hall(void)
 {
 	for (uint8_t i = 0, cc = 0; i < 100; i++)
 	{
@@ -117,21 +121,21 @@ int main(void)
 	if (eeprom_read_byte(&eep_fresh_EE))
 	{
 		eeprom_write_byte(&eep_fresh_EE, 0);
-		eeprom_write_byte(&charge_speed_EE, 6);
+		eeprom_write_byte(&charge_speed_EE, SPEED_SLOW);
 	}
 	
 	uint8_t charge_speed = eeprom_read_byte(&charge_speed_EE);
 	
-	while (scnan_hall())
+	while (scan_hall())
 	{
-		if (charge_speed == 6)
-			charge_speed = 12;
-		else if (charge_speed == 12)
-			charge_speed = 16;
-		else if (charge_speed == 16)
-			charge_speed = 6;
+		if (charge_speed == SPEED_SLOW)
+			charge_speed = SPEED_FAST;
+		else if (charge_speed == SPEED_FAST)
+			charge_speed = SPEED_FULL;
+		else if (charge_speed == SPEED_FULL)
+			charge_speed = SPEED_SLOW;
 		else
-			charge_speed = 6;
+			charge_speed = SPEED_SLOW;
 
 		show_speed(charge_speed);
 	}
